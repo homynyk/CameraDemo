@@ -1,10 +1,16 @@
 package ualberta.cmput301.camerademo;
 
+import java.net.URI;
+
 import ualberta.cmput301.camerodemo.R;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.util.DisplayMetrics;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -41,11 +47,43 @@ public class CameraDemoActivity extends Activity {
 	// finishes, while startActivityForResult() method will. To retrieve the returned result, you may 
 	// need implement onAcitityResult() method.
 	public void takeAPhoto() {
-		// To Do		
+		// To Do
+		Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+		startActivityForResult(intent, 0);
 	}
 	
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		// To Do
+		if (requestCode == 0){
+			if (resultCode == RESULT_OK) {
+				Bitmap bm = (Bitmap) data.getExtras().getParcelable("data");
+				//imageButton.setImageBitmap(bm);
+				//textView.setText("Photo OK");
+				
+				//Save picture
+				String imagepath = Environment.getExternalStorageDirectory().getAbsolutePath();
+				URI uri = new URI(Environment.getExternalStorageDirectory().getAbsolutePath());
+				Intent intent = new Intent(MediaStore.EXTRA_OUTPUT, uri);
+				
+				//Get screen dimensions
+				DisplayMetrics display = new DisplayMetrics();
+			    getWindowManager().getDefaultDisplay().getMetrics(display);
+			    int screenWidth = display.widthPixels;
+			    int  screenHeight = display.heightPixels;
+				
+				//Scale image
+			    Bitmap bm_scaled;
+				Boolean filter=true;
+				bm_scaled = Bitmap.createScaledBitmap(bm, screenWidth, 2*screenHeight/3, filter);
+				imageButton.setImageBitmap(bm_scaled);
+				textView.setText("Photo OK");
+				
+			} else if (resultCode == RESULT_CANCELED) {
+				textView.setText("Photo Canceled");
+			} else {
+				textView.setText("Not sure what happened.");
+			}
+		}
 	}	
 	
 	@Override
